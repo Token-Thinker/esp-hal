@@ -49,12 +49,20 @@ use core::{
 };
 
 use crate::{
-    dma::{ChannelRx, DmaEligible, DmaError, DmaRxBuffer, PeripheralRxChannel, Rx, RxChannelFor},
+    Blocking,
+    dma::{
+        ChannelRx,
+        DmaEligible,
+        DmaError,
+        DmaRxBuffer,
+        PeripheralRxChannel,
+        RegisterAccess,
+        RxChannelFor,
+    },
     gpio::{InputPin, Level, Pull},
-    i2s::master::{Error, ExtendedSignals, RegisterAccess},
+    i2s::master::{Error, ExtendedSignals},
     peripheral::{Peripheral, PeripheralRef},
     system::PeripheralClockControl,
-    Blocking,
 };
 
 /// Supported data formats
@@ -372,7 +380,7 @@ impl<'d, I2S: RegisterAccess, BUF: DmaRxBuffer> CameraTransfer<'d, I2S, BUF> {
     pub fn is_done(&self) -> bool {
         self.camera.rx_channel.has_dscr_empty_error() // IN_DSCR_EMPTY (i.e. No more buffer space)
             || self.camera.rx_channel.has_error() // IN_DSCR_ERR (i.e. bad
-                                                  // descriptor)
+        // descriptor)
     }
 
     /// Stops this transfer on the spot and returns the peripheral and buffer.

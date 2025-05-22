@@ -30,6 +30,7 @@
 
 use esp_backtrace as _;
 use esp_hal::{
+    Blocking,
     delay::Delay,
     dma_rx_stream_buffer,
     i2c::{
@@ -38,16 +39,15 @@ use esp_hal::{
     },
     i2s::master::camera::{Camera, Config},
     ledc::{
-        channel::{self, config::PinConfig, ChannelIFace},
-        timer,
-        timer::{config::Duty, LSClockSource, Number, TimerIFace},
         LSGlobalClkSource,
         Ledc,
         LowSpeed,
+        channel::{self, ChannelIFace, config::PinConfig},
+        timer,
+        timer::{LSClockSource, Number, TimerIFace, config::Duty},
     },
     main,
     time::Rate,
-    Blocking,
 };
 use esp_println::println;
 
