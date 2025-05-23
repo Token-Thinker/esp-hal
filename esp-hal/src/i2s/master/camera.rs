@@ -61,7 +61,6 @@ use crate::{
     },
     gpio::{InputPin, Level, Pull},
     i2s::master::{Error, ExtendedSignals},
-    peripheral::{Peripheral, PeripheralRef},
     system::PeripheralClockControl,
 };
 
@@ -83,8 +82,8 @@ pub enum DataFormat {
 
 /// Represents the camera interface.
 pub struct Camera<'d, I2S: DmaEligible> {
-    _i2s: PeripheralRef<'d, I2S>,
-    rx_channel: ChannelRx<'d, Blocking, PeripheralRxChannel<I2S>>,
+    _i2s: I2S<'d>,
+    rx_channel: ChannelRx<Blocking, PeripheralRxChannel<I2S<'d>>>,
 }
 
 impl<'d, I2S> Camera<'d, I2S>
@@ -93,11 +92,11 @@ where
 {
     /// Creates a new `Camera` instance with DMA support.
     pub fn new<CH: RxChannelFor<I2S>>(
-        i2s: impl Peripheral<P = I2S> + 'd,
+        i2s: I2S<'d>,
         config: Config,
-        channel: impl Peripheral<P = CH> + 'd,
+        channel: CH<'d>,
     ) -> Self {
-        crate::into_ref!(i2s);
+        //crate::into_ref!(i2s);
 
         PeripheralClockControl::enable(i2s.peripheral());
 
@@ -202,14 +201,14 @@ where
         D7: InputPin,
     >(
         self,
-        d0: impl Peripheral<P = D0>,
-        d1: impl Peripheral<P = D1>,
-        d2: impl Peripheral<P = D2>,
-        d3: impl Peripheral<P = D3>,
-        d4: impl Peripheral<P = D4>,
-        d5: impl Peripheral<P = D5>,
-        d6: impl Peripheral<P = D6>,
-        d7: impl Peripheral<P = D7>,
+        d0: D0,
+        d1: D1,
+        d2: D2,
+        d3: D3,
+        d4: D4,
+        d5: D5,
+        d6: D6,
+        d7: D7,
     ) -> Self {
         self.with_d0(d0)
             .with_d1(d1)
@@ -224,8 +223,8 @@ where
     /// Configures the d0 pin.
     /// Use either [`Self::with_data_pins`] *or*
     /// [`Self::with_d0`]..[`Self::with_d7`].
-    pub fn with_d0<PIN: InputPin>(self, pin: impl Peripheral<P = PIN>) -> Self {
-        crate::into_mapped_ref!(pin);
+    pub fn with_d0<PIN: InputPin>(self, pin: PIN) -> Self {
+        
         pin.init_input(Pull::None);
         I2S::din0_signal().connect_to(pin);
         self
@@ -234,8 +233,8 @@ where
     /// Configures the d1 pin.
     /// Use either [`Self::with_data_pins`] *or*
     /// [`Self::with_d0`]..[`Self::with_d7`].
-    pub fn with_d1<PIN: InputPin>(self, pin: impl Peripheral<P = PIN>) -> Self {
-        crate::into_mapped_ref!(pin);
+    pub fn with_d1<PIN: InputPin>(self, pin: PIN) -> Self {
+        
         pin.init_input(Pull::None);
         I2S::din1_signal().connect_to(pin);
         self
@@ -244,8 +243,8 @@ where
     /// Configures the d2 pin.
     /// Use either [`Self::with_data_pins`] *or*
     /// [`Self::with_d0`]..[`Self::with_d7`].
-    pub fn with_d2<PIN: InputPin>(self, pin: impl Peripheral<P = PIN>) -> Self {
-        crate::into_mapped_ref!(pin);
+    pub fn with_d2<PIN: InputPin>(self, pin: PIN) -> Self {
+        
         pin.init_input(Pull::None);
         I2S::din2_signal().connect_to(pin);
         self
@@ -254,8 +253,8 @@ where
     /// Configures the d3 pin.
     /// Use either [`Self::with_data_pins`] *or*
     /// [`Self::with_d0`]..[`Self::with_d7`].
-    pub fn with_d3<PIN: InputPin>(self, pin: impl Peripheral<P = PIN>) -> Self {
-        crate::into_mapped_ref!(pin);
+    pub fn with_d3<PIN: InputPin>(self, pin: PIN) -> Self {
+        
         pin.init_input(Pull::None);
         I2S::din3_signal().connect_to(pin);
         self
@@ -264,8 +263,8 @@ where
     /// Configures the d4 pin.
     /// Use either [`Self::with_data_pins`] *or*
     /// [`Self::with_d0`]..[`Self::with_d7`].
-    pub fn with_d4<PIN: InputPin>(self, pin: impl Peripheral<P = PIN>) -> Self {
-        crate::into_mapped_ref!(pin);
+    pub fn with_d4<PIN: InputPin>(self, pin: PIN) -> Self {
+        
         pin.init_input(Pull::None);
         I2S::din4_signal().connect_to(pin);
         self
@@ -274,8 +273,8 @@ where
     /// Configures the d5 pin.
     /// Use either [`Self::with_data_pins`] *or*
     /// [`Self::with_d0`]..[`Self::with_d7`].
-    pub fn with_d5<PIN: InputPin>(self, pin: impl Peripheral<P = PIN>) -> Self {
-        crate::into_mapped_ref!(pin);
+    pub fn with_d5<PIN: InputPin>(self, pin: PIN) -> Self {
+        
         pin.init_input(Pull::None);
         I2S::din5_signal().connect_to(pin);
         self
@@ -284,8 +283,8 @@ where
     /// Configures the d6 pin.
     /// Use either [`Self::with_data_pins`] *or*
     /// [`Self::with_d0`]..[`Self::with_d7`].
-    pub fn with_d6<PIN: InputPin>(self, pin: impl Peripheral<P = PIN>) -> Self {
-        crate::into_mapped_ref!(pin);
+    pub fn with_d6<PIN: InputPin>(self, pin: PIN) -> Self {
+        
         pin.init_input(Pull::None);
         I2S::din6_signal().connect_to(pin);
         self
@@ -294,40 +293,37 @@ where
     /// Configures the d7 pin.
     /// Use either [`Self::with_data_pins`] *or*
     /// [`Self::with_d0`]..[`Self::with_d7`].
-    pub fn with_d7<PIN: InputPin>(self, pin: impl Peripheral<P = PIN>) -> Self {
-        crate::into_mapped_ref!(pin);
+    pub fn with_d7<PIN: InputPin>(self, pin: PIN) -> Self {
         pin.init_input(Pull::None);
         I2S::din7_signal().connect_to(pin);
         self
     }
 
     /// Configures the pixel clock pin for the camera interface.
-    pub fn with_ws<PIN: InputPin>(self, pin: impl Peripheral<P = PIN>) -> Self {
-        crate::into_mapped_ref!(pin);
+    pub fn with_ws<PIN: InputPin>(self, pin: PIN) -> Self {
+        
         pin.init_input(Pull::None);
         I2S::ws_in_signal().connect_to(pin);
         self
     }
 
     /// Configures the vertical sync (VSYNC) pin for the camera interface.
-    pub fn with_vsync<PIN: InputPin>(self, pin: impl Peripheral<P = PIN>) -> Self {
-        crate::into_mapped_ref!(pin);
+    pub fn with_vsync<PIN: InputPin>(self, pin: PIN) -> Self {
         pin.init_input(Pull::None);
         I2S::v_sync_signal().connect_to(pin);
         self
     }
 
     /// Configures the horizontal sync (HSYNC) pin for the camera interface.
-    pub fn with_hsync<PIN: InputPin>(self, pin: impl Peripheral<P = PIN>) -> Self {
-        crate::into_mapped_ref!(pin);
+    pub fn with_hsync<PIN: InputPin>(self, pin: PIN) -> Self {
         pin.init_input(Pull::None);
         I2S::h_sync_signal().connect_to(pin);
         self
     }
 
     /// Configures the horizontal sync enable pin for the camera interface.
-    pub fn with_henable<PIN: InputPin>(self, pin: impl Peripheral<P = PIN>) -> Self {
-        crate::into_mapped_ref!(pin);
+    pub fn with_henable<PIN: InputPin>(self, pin: PIN) -> Self {
+        
         pin.init_input(Pull::None);
         I2S::h_enable_signal().connect_to(pin);
         self
